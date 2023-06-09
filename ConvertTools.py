@@ -805,7 +805,7 @@ class SubFrame3(tk.Frame):
         self.sUnit = tk.StringVar()
         self.dValue.set(1.0)
         
-        units = [("兆瓦", "Mw"), ("千瓦", "Kw"), ("瓦", "w")]
+        units = [("千兆瓦", "Kmw"), ("兆瓦", "Mw"), ("千瓦", "Kw"), ("瓦", "w")]
         unit_values = []
         for item in units:
             unit_values.append(item[0])
@@ -861,7 +861,9 @@ class SubFrame3(tk.Frame):
     def convertValue(self, dValue, unit):
         
         dW = 0
-        if unit == "兆瓦":
+        if unit == "千兆瓦":
+            dW = self.convertKmw2W(dValue)        
+        elif unit == "兆瓦":
             dW = self.convertMw2W(dValue)
         elif unit == "千瓦":
             dW = self.convertKw2W(dValue)
@@ -872,7 +874,9 @@ class SubFrame3(tk.Frame):
         for item in self.units:
             
             value = 0
-            if item["unit"][0] == "兆瓦":
+            if item["unit"][0] == "千兆瓦":
+                value = self.convertW2Kmw(dW)            
+            elif item["unit"][0] == "兆瓦":
                 value = self.convertW2Mw(dW)
             elif item["unit"][0] == "千瓦":
                 value = self.convertW2Kw(dW)
@@ -883,6 +887,9 @@ class SubFrame3(tk.Frame):
             self.setItemValue(item, value)
             
             
+    def convertKmw2W(self, dKmw):
+        
+        return dKmw * 10.0 ** 9
     
     def convertMw2W(self, dMw):
         
@@ -895,6 +902,10 @@ class SubFrame3(tk.Frame):
     def convertW2W(self, dW):
         
         return dW
+    
+    def convertW2Kmw(self, dW):
+        
+        return dW / 10.0 ** 9
     
     def convertW2Mw(self, dW):
         
@@ -1293,7 +1304,8 @@ class SubFrame6(tk.Frame):
         self.dValue.set(1.0)
         
         units = [("千米/时", "Km/h"), ("千米/秒", "Km/s"), ("米/时", "m/h"), ("米/秒", "m/s"),
-                 ("海里/时", "nmi/h"), ("海里/秒", "nmi/s"), ("英里/时", "mi/h"), ("英里/秒", "mi/s"),
+                 ("海里/时", "nmi/h"), ("海里/秒", "nmi/s"), ("码/时", "yd/h"), ("码/秒", "yd/s"),
+                 ("英里/时", "mi/h"), ("英里/秒", "mi/s"), ("英尺/时", "ft/h"), ("英尺/秒", "ft/s"),
                  ("英寸/时", "in/h"), ("英寸/秒", "in/s"), ("光速", "c"), ("马赫", "mach")]
         
         unit_values = []
@@ -1307,13 +1319,14 @@ class SubFrame6(tk.Frame):
         sel.current(0)
         
         lab.grid(row=0, column=0, padx=(30, 0), pady=(10, 0), sticky=tk.E)
-        val.grid(row=0, column=1, padx=(10, 0), pady=(10, 0))
-        sel.grid(row=0, column=2, padx=(10, 0), pady=(10, 0))
-        btn.grid(row=0, column=3, padx=(10, 0), pady=(10, 0))
+        val.grid(row=0, column=1, padx=(10, 0), pady=(10, 0), sticky=tk.W)
+        sel.grid(row=0, column=2, padx=(10, 0), pady=(10, 0), sticky=tk.W)
+        btn.grid(row=0, column=3, padx=(10, 0), pady=(10, 0), sticky=tk.W)
         
         self.units = []
         for index in range(len(units)):
-            row = index + 1
+            row = index % 8 + 1
+            col = index // 8 * 2
             item = units[index]
             lab_titile = "{}:".format(item[0])
             lab_content = "0 {}".format(item[1])
@@ -1322,8 +1335,8 @@ class SubFrame6(tk.Frame):
             self.units.append({"value": value, "unit": item})
             title = tk.Label(self, text=lab_titile)
             content = LabelValue(self, textvariable=value)
-            title.grid(row=row, column=0, padx=(30, 0), pady=(10, 0), sticky=tk.E)
-            content.grid(row=row, column=1, padx=(10, 0), pady=(10, 0), sticky=tk.W, columnspan=4)            
+            title.grid(row=row, column=col + 0, padx=(30, 0), pady=(10, 0), sticky=tk.E)
+            content.grid(row=row, column=col + 1, padx=(10, 0), pady=(10, 0), sticky=tk.W)            
             
             
         self.convertValue(toReal(self.dValue.get()), self.sUnit.get())
@@ -1363,10 +1376,18 @@ class SubFrame6(tk.Frame):
             dSpeed = self.convertNmih2Speed(dValue)
         elif unit == "海里/秒":      
             dSpeed = self.convertNmis2Speed(dValue)
+        elif unit == "码/时":      
+            dSpeed = self.convertYdh2Speed(dValue)
+        elif unit == "码/秒":      
+            dSpeed = self.convertYds2Speed(dValue)            
         elif unit == "英里/时":      
             dSpeed = self.convertMih2Speed(dValue)
         elif unit == "英里/秒":      
             dSpeed = self.convertMis2Speed(dValue)
+        elif unit == "英尺/时":      
+            dSpeed = self.convertFth2Speed(dValue)
+        elif unit == "英尺/秒":      
+            dSpeed = self.convertFts2Speed(dValue)            
         elif unit == "英寸/时":      
             dSpeed = self.convertInh2Speed(dValue)
         elif unit == "英寸/秒":      
@@ -1392,10 +1413,18 @@ class SubFrame6(tk.Frame):
                 value = self.convertSpeed2Nmih(dSpeed)
             elif item["unit"][0] == "海里/秒":
                 value = self.convertSpeed2Nmis(dSpeed)
+            elif item["unit"][0] == "码/时":
+                value = self.convertSpeed2Ydh(dSpeed)
+            elif item["unit"][0] == "码/秒":
+                value = self.convertSpeed2Yds(dSpeed)                
             elif item["unit"][0] == "英里/时":
                 value = self.convertSpeed2Mih(dSpeed)
             elif item["unit"][0] == "英里/秒":
                 value = self.convertSpeed2Mis(dSpeed)
+            elif item["unit"][0] == "英尺/时":
+                value = self.convertSpeed2Fth(dSpeed)
+            elif item["unit"][0] == "英尺/秒":
+                value = self.convertSpeed2Fts(dSpeed)                
             elif item["unit"][0] == "英寸/时":
                 value = self.convertSpeed2Inh(dSpeed)
             elif item["unit"][0] == "英寸/秒":
@@ -1431,22 +1460,38 @@ class SubFrame6(tk.Frame):
     def convertNmis2Speed(self, dSpeed):
         
         return dSpeed * METER_NMI
+    
+    def convertYdh2Speed(self, dSpeed):
+        
+        return dSpeed * METER_YD / 3600.0
+
+    def convertYds2Speed(self, dSpeed):
+        
+        return dSpeed * METER_YD
 
     def convertMih2Speed(self, dSpeed):
         
-        return dSpeed * METER_MI / 3600.0
+        return dSpeed / METER_MI / 3600.0
   
     def convertMis2Speed(self, dSpeed):
         
-        return dSpeed * METER_MI
+        return dSpeed / METER_MI
+    
+    def convertFth2Speed(self, dSpeed):
+        
+        return dSpeed / METER_FT / 3600.0
+
+    def convertFts2Speed(self, dSpeed):
+        
+        return dSpeed / METER_FT    
   
     def convertInh2Speed(self, dSpeed):
         
-        return dSpeed * METER_IN / 3600.0
+        return dSpeed / METER_IN / 3600.0
 
     def convertIns2Speed(self, dSpeed):
         
-        return dSpeed * METER_IN
+        return dSpeed / METER_IN
 
     def convertC2Speed(self, dSpeed):
         
@@ -1480,22 +1525,38 @@ class SubFrame6(tk.Frame):
     def convertSpeed2Nmis(self, dSpeed):
         
         return dSpeed / METER_NMI
+    
+    def convertSpeed2Ydh(self, dSpeed):
+        
+        return dSpeed / METER_YD * 3600.0
+
+    def convertSpeed2Yds(self, dSpeed):
+        
+        return dSpeed / METER_YD    
 
     def convertSpeed2Mih(self, dSpeed):
         
-        return dSpeed / METER_MI * 3600.0
+        return dSpeed * METER_MI * 3600.0
   
     def convertSpeed2Mis(self, dSpeed):
         
-        return dSpeed / METER_MI
+        return dSpeed * METER_MI
+    
+    def convertSpeed2Fth(self, dSpeed):
+        
+        return dSpeed * METER_FT * 3600.0
+
+    def convertSpeed2Fts(self, dSpeed):
+        
+        return dSpeed * METER_FT    
   
     def convertSpeed2Inh(self, dSpeed):
         
-        return dSpeed / METER_IN * 3600.0
+        return dSpeed * METER_IN * 3600.0
 
     def convertSpeed2Ins(self, dSpeed):
         
-        return dSpeed / METER_IN
+        return dSpeed * METER_IN
 
     def convertSpeed2C(self, dSpeed):
         
