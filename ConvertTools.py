@@ -285,19 +285,19 @@ class SubFrame(tk.Frame):
     
     def convertMM2Meter(self, dMM):
         
-        return dMM / 100.0 / 10.0 ** 3
+        return dMM / 1000.0
     
     def convertUM2Meter(self, dUM):
         
-        return dUM / 100.0 / 10.0 ** 6
+        return dUM / 1000.0 / 10.0 ** 3
     
     def convertNM2Meter(self, dNM):
         
-        return dNM / 100.0 / 10.0 ** 9
+        return dNM / 1000.0 / 10.0 ** 6
     
     def convertPM2Meter(self, dPM):
         
-        return dPM / 100.0 / 10.0 ** 12
+        return dPM / 1000.0 / 10.0 ** 9
     
     def convertYD2Meter(self, dYD):
         
@@ -370,19 +370,19 @@ class SubFrame(tk.Frame):
     
     def convertMeter2MM(self, dMeter):
         
-        return dMeter * 100.0 * 10.0 ** 3
+        return dMeter * 1000.0
     
     def convertMeter2UM(self, dMeter):
         
-        return dMeter * 100.0 * 10.0 ** 6
+        return dMeter * 1000.0 * 10.0 ** 3
     
     def convertMeter2NM(self, dMeter):
         
-        return dMeter * 100.0 * 10 ** 9
+        return dMeter * 1000.0 * 10 ** 6
     
     def convertMeter2PM(self, dMeter):
         
-        return dMeter * 100.0 * 10 ** 12
+        return dMeter * 1000.0 * 10 ** 9
     
     def convertMeter2YD(self, dMeter):
         
