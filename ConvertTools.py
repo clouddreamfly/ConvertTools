@@ -72,25 +72,55 @@ def toBool(value):
     return val
    
 
+MM_COPY = 1
+MM_COPY_VALUE = 2
+MM_COPY_ALL = 3
+
 
 class LabelValue(tk.Label):
     
     def __init__(self, master=None, cnf={}, **kw):
+        
+        self._menu_mode = MM_COPY_ALL
+        if kw and "mode" in kw.keys():
+            self._menu_mode = int(kw["mode"])
+            del kw["mode"]
+        
         super().__init__(master, cnf, **kw)
-        self.bind("<Button-3>", self.onPopupMenu) 
+        if self._menu_mode != 0: 
+            self.bind("<Button-3>", self.onPopupMenu) 
         
     def onPopupMenu(self, event):
         
         self._menu = tk.Menu(self, tearoff=False)
-        self._menu.add_command(label="复制", command=self.onCopy)
+        if self._menu_mode == MM_COPY:  
+            self._menu.add_command(label="复制", command=self.onCopyAll)
+        elif self._menu_mode == MM_COPY_VALUE:
+            self._menu.add_command(label="复制值", command=self.onCopyValue)
+        elif self._menu_mode == MM_COPY_ALL:
+            self._menu.add_command(label="复制值", command=self.onCopyValue)
+            self._menu.add_command(label="全复制", command=self.onCopyAll)
+        
         self._menu.post(event.x_root, event.y_root)
         
-    def onCopy(self):
+    def onCopyValue(self):
+        
+        text = self.cget("text")
+        if type(text) == type(0):
+            text = str(text)
+   
+        text = text.split(" ")[0]
+        self.clipboard_clear()
+        self.clipboard_append(text)
+        self._menu.grab_release()
+        self._menu = None
+        
+    def onCopyAll(self):
         
         self.clipboard_clear()
         self.clipboard_append(self.cget("text"))
         self._menu.grab_release()
-        self._menu = None
+        self._menu = None    
         
 
 
@@ -1177,7 +1207,7 @@ class SubFrame5(tk.Frame):
         
     def convertValue(self, dValue, unit):
       
-        dSpeed = 0
+        dByte = 0
         if unit == "比特":
             dByte = self.convertBit2Byte(dValue)
         elif unit == "字节":
@@ -1588,7 +1618,7 @@ class SubFrame7(tk.Frame):
         self.sUnit = tk.StringVar()
         self.dValue.set(1.0)
         
-        units = [("摄氏度", "℃"), ("开氏度", "K"), ("列氏度", "°Re"), ("华氏度", "℉"), ("兰氏度", "°R")]
+        units = [("摄氏度", "°C"), ("开氏度", "°K"), ("列氏度", "°Re"), ("华氏度", "°F"), ("兰氏度", "°R")]
         
         unit_values = []
         for item in units:
